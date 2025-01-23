@@ -93,7 +93,16 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                       child: ElevatedButton(
                         onPressed: () {
                           if (_checkIfAllFieldsAreFilled()) {
-                            // Обработка, если все поля заполнены
+                            Navigator.pushNamed(
+                              context,
+                              '/game',
+                              arguments: {
+                                'numberOfPlayers': _numberOfPlayers,
+                                'playerNames': _controllers
+                                    .map((controller) => controller.text)
+                                    .toList(),
+                              },
+                            );
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(

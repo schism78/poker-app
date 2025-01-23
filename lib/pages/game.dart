@@ -19,6 +19,11 @@ class _GameState extends State<Game> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final Map<String, dynamic> args =
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    final int numberOfPlayers = args['numberOfPlayers'];
+    final List<String> playerNames = args['playerNames'];
+
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(kToolbarHeight),
@@ -37,8 +42,8 @@ class _GameState extends State<Game> with SingleTickerProviderStateMixin {
       body: TabBarView(
         controller: _tabController,
         children: [
-          Center(child: Text('Ставки content')), // Содержимое первой вкладки
-          Center(child: Text('Таблица content')), // Содержимое второй вкладки
+          Center(child: Text('Количество игроков: $numberOfPlayers')),
+          Center(child: Text('Имена игроков: ${playerNames}')),
         ],
       ),
     );
