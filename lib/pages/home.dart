@@ -93,14 +93,18 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                       child: ElevatedButton(
                         onPressed: () {
                           if (_checkIfAllFieldsAreFilled()) {
+                            // Собираем имена игроков из контроллеров
+                            List<String> playerNames = _controllers
+                                .map((controller) => controller.text)
+                                .toList();
+
+                            // Переходим на страницу игры и передаем данные
                             Navigator.pushNamed(
                               context,
                               '/game',
                               arguments: {
                                 'numberOfPlayers': _numberOfPlayers,
-                                'playerNames': _controllers
-                                    .map((controller) => controller.text)
-                                    .toList(),
+                                'playerNames': playerNames,
                               },
                             );
                           } else {
