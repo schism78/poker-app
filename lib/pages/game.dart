@@ -11,7 +11,43 @@ class Game extends StatefulWidget {
 class _GameState extends State<Game> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late int numberOfPlayers;
+  late int maxCards;
   late List<String> playerNames;
+  late List<String> roundList;
+
+  // Метод для создания списка раундов
+  List<String> createRoundList(int numberOfPlayers, int maxCards) {
+    List<String> roundList = [];
+
+    // Добавляем карты по возрастанию
+    for (int i = 0; i < maxCards - 1; i++) {
+      roundList.add((i + 1).toString());
+    }
+
+    // Добавляем максимальную карту для каждого игрока
+    for (int i = 0; i < numberOfPlayers; i++) {
+      roundList.add(maxCards.toString());
+    }
+
+    // Добавляем карты по убыванию
+    for (int i = maxCards - 1; i > 0; i--) {
+      roundList.add(i.toString());
+    }
+
+    for (int i = 0; i < numberOfPlayers; i++) {
+      roundList.add("Б");
+    }
+
+    for (int i = 0; i < numberOfPlayers; i++) {
+      roundList.add("З");
+    }
+
+    for (int i = 0; i < numberOfPlayers; i++) {
+      roundList.add("Т");
+    }
+
+    return roundList;
+  }
 
   @override
   void initState() {
@@ -34,12 +70,21 @@ class _GameState extends State<Game> with SingleTickerProviderStateMixin {
       playerNames = List<String>.from(args['playerNames'] ??
           []); // Устанавливаем пустой список, если playerNames не переданы
 
+      // Рассчитываем максимальное количество карт
+      maxCards = 36 ~/
+          numberOfPlayers; // Используем целочисленное деление (например, 36 / 3 = 12)
+
+      // Создаем список раундов
+      roundList = createRoundList(numberOfPlayers, maxCards);
+
       // Создаем игру в базе данных после получения данных
       _createGame();
     } else {
       // Если аргументы не переданы, можно обработать эту ошибку или использовать значения по умолчанию
       numberOfPlayers = 0;
       playerNames = [];
+      maxCards = 0;
+      roundList = [];
     }
   }
 
@@ -70,7 +115,7 @@ class _GameState extends State<Game> with SingleTickerProviderStateMixin {
         controller: _tabController,
         children: [
           Center(child: Text('Количество игроков: $numberOfPlayers')),
-          Center(child: Text('Имена игроков: ${playerNames.join(", ")}')),
+          Center(child: Text('Имена игроков: ${roundList.join(", ")}')),
         ],
       ),
     );
