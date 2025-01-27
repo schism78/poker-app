@@ -100,4 +100,32 @@ class DatabaseHelper {
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
+
+  Future<void> insertRound(int gameId, String typeOfGame) async {
+    final db = await database;
+    await db.insert(
+      tableRounds,
+      {
+        columnGameIDRounds: gameId,
+        columnTypeOfGame: typeOfGame,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<void> insertBet(int playerId, int roundId, int orderedTakes,
+      int takenTakes, int points) async {
+    final db = await database;
+    await db.insert(
+      tableBets,
+      {
+        columnPlayerIDBets: playerId,
+        columnRoundIDBets: roundId,
+        columnAmountOfOrderedTakes: orderedTakes,
+        columnAmountOfTakenTakes: takenTakes,
+        columnPoints: points,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
 }
