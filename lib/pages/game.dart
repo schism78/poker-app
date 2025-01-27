@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:app/services/database_helper.dart'; // Убедитесь, что правильно импортируете файл с базой данных
+import 'package:app/services/database_helper.dart';
 
 class Game extends StatefulWidget {
   const Game({super.key});
@@ -26,6 +26,7 @@ class _GameState extends State<Game> with SingleTickerProviderStateMixin {
 
   // Список для хранения реальных взяток, которые игроки действительно взяли
   late List<int> actualTakes;
+  late List<int> points;
 
   // Флаг для первого запуска
   bool isFirstRun = true;
@@ -35,6 +36,40 @@ class _GameState extends State<Game> with SingleTickerProviderStateMixin {
 
   // Сообщение об ошибке
   String errorMessage = '';
+
+  List<int> countPoints(List<String> orderedTakesType, List<int> orderedTakes,
+      List<int> actualTakes, List<int> points) {
+    for (int i = 0; i < orderedTakesType.length; i++) {
+      if (orderedTakes[i] == actualTakes[i]) {
+        if (orderedTakesType[i] == "Обычная") {
+          if (actualTakes[i] == 0) {
+            points[i] += 5;
+          } else {
+            points[i] += orderedTakes[i] * 10;
+          }
+        } else {
+          if (actualTakes[i] == 0) {
+            points[i] += 10;
+          } else {
+            points[i] += orderedTakes[i] * 20;
+          }
+        }
+      } else if (actualTakes[i] < orderedTakes[i]) {
+        if (orderedTakesType[i] == "Обычная") {
+          points[i] -= (orderedTakes[i] - actualTakes[i]) * 10;
+        } else {
+          points[i] -= (orderedTakes[i] - actualTakes[i]) * 20;
+        }
+      } else {
+        if (orderedTakesType[i] == "Обычная") {
+          points[i] += actualTakes[i];
+        } else {
+          points[i] += actualTakes[i] * 2;
+        }
+      }
+    }
+    return points;
+  }
 
   // Метод для создания списка раундов
   List<String> createRoundList(int numberOfPlayers, int maxCards) {
@@ -101,6 +136,9 @@ class _GameState extends State<Game> with SingleTickerProviderStateMixin {
         // Инициализируем список реальных взяток (по умолчанию 0)
         actualTakes = List<int>.filled(numberOfPlayers, 0);
 
+        // Инициализируем список очков (по умолчанию 0)
+        points = List<int>.filled(numberOfPlayers, 0);
+
         // Создаем игру в базе данных после получения данных
         _createGame();
       } else {
@@ -111,6 +149,7 @@ class _GameState extends State<Game> with SingleTickerProviderStateMixin {
         orderedTakes = [];
         orderedTakesType = [];
         actualTakes = [];
+        points = [];
       }
 
       isFirstRun = false;
@@ -126,6 +165,9 @@ class _GameState extends State<Game> with SingleTickerProviderStateMixin {
   // Метод для увеличения текущего раунда и сброса ставок
   void _nextRound() {
     if (currentRound < roundList.length - 1) {
+      // Вызов функции подсчета очков
+      points = countPoints(orderedTakesType, orderedTakes, actualTakes, points);
+
       setState(() {
         currentRound++;
         // После перехода к следующему раунду сбрасываем ставки на 0
