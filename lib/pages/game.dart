@@ -14,6 +14,8 @@ class _GameState extends State<Game> with SingleTickerProviderStateMixin {
   late int maxCards;
   late List<String> playerNames;
   late List<String> roundList;
+  late List<int> playerIds;
+  late int gameId;
 
   // Переменная для хранения текущего раунда
   int currentRound = 0;
@@ -127,6 +129,8 @@ class _GameState extends State<Game> with SingleTickerProviderStateMixin {
         maxCards = 36 ~/ numberOfPlayers; // Используем целочисленное деление
         roundList = createRoundList(numberOfPlayers, maxCards);
 
+        playerIds = List<int>.generate(numberOfPlayers, (index) => index + 1);
+
         // Инициализируем список взяток для каждого игрока (по умолчанию 0)
         orderedTakes = List<int>.filled(numberOfPlayers, 0);
 
@@ -159,14 +163,35 @@ class _GameState extends State<Game> with SingleTickerProviderStateMixin {
   // Метод для вставки новой игры в базу данных
   Future<void> _createGame() async {
     final dbHelper = DatabaseHelper();
-    await dbHelper.insertGame(numberOfPlayers);
+
+    // Создаем игру и получаем её ID
+    gameId = await dbHelper.insertGame(numberOfPlayers);
+
+    for (int i = 0; i < playerNames.length; i++) {
+      int playerId = await dbHelper.insertPlayer(gameId, playerNames[i]);
+      playerIds.add(playerId); // Сохраняем ID игроков в список
+    }
   }
 
   // Метод для увеличения текущего раунда и сброса ставок
-  void _nextRound() {
+  Future<void> _nextRound() async {
     if (currentRound < roundList.length - 1) {
+      final dbHelper = DatabaseHelper();
       // Вызов функции подсчета очков
       points = countPoints(orderedTakesType, orderedTakes, actualTakes, points);
+
+      int roundId = await dbHelper.insertRound(gameId, roundList[currentRound]);
+
+      for (int i = 0; i < numberOfPlayers; i++) {
+        int playerIdValue = playerIds[i];
+        int orderedTakesValue = orderedTakes[i];
+        int takenTakesValue = actualTakes[i];
+        int pointsValue = points[i];
+
+        // Вставляем ставку для игрока в этот раунд
+        await dbHelper.insertBet(playerIdValue, roundId, orderedTakesValue,
+            takenTakesValue, pointsValue);
+      }
 
       setState(() {
         currentRound++;

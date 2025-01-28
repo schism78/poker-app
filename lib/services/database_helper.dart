@@ -80,18 +80,18 @@ class DatabaseHelper {
     ''');
   }
 
-  Future<void> insertGame(int numberOfPlayers) async {
+  Future<int> insertGame(int numberOfPlayers) async {
     final db = await database;
-    await db.insert(
+    return await db.insert(
       tableGames,
       {columnAmountOfPlayers: numberOfPlayers},
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 
-  Future<void> insertPlayer(int gameId, String playerName) async {
+  Future<int> insertPlayer(int gameId, String playerName) async {
     final db = await database;
-    await db.insert(
+    return await db.insert(
       tablePlayers,
       {
         columnGameIDPlayers: gameId,
@@ -101,9 +101,9 @@ class DatabaseHelper {
     );
   }
 
-  Future<void> insertRound(int gameId, String typeOfGame) async {
+  Future<int> insertRound(int gameId, String typeOfGame) async {
     final db = await database;
-    await db.insert(
+    return await db.insert(
       tableRounds,
       {
         columnGameIDRounds: gameId,
